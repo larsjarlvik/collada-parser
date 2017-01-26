@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+  "resource": [
+    "shaders/*.glsl"
+  ],
+  "dependencies": {},
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.1.0"
+        },
+        "OpenTK.NETCore": {
+          "version": "1.1.2571.6431"
+        }
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}
