@@ -61,7 +61,7 @@ namespace ColladaParser
 				new IntPtr(positionVboData.Length * Vector3.SizeInBytes),
 				positionVboData, BufferUsageHint.StaticDraw);
 
-			// Normals
+			// Colors
 			GL.GenBuffers(1, out colorBuffer);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, colorBuffer);
 			GL.BufferData<Vector3>(BufferTarget.ArrayBuffer,

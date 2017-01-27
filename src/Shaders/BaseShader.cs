@@ -1,12 +1,10 @@
 using System;
-using System.IO;
-using System.Reflection;
-using OpenTK;
+using ColladaParser.Common;
 using OpenTK.Graphics.OpenGL;
 
 namespace ColladaParser.Shaders
 {
-	public class BaseShader
+    public class BaseShader
 	{
 		public int ShaderProgram;
 
@@ -15,11 +13,11 @@ namespace ColladaParser.Shaders
 			var vertexShader = GL.CreateShader(ShaderType.VertexShader);
 			var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
 
-			GL.ShaderSource(vertexShader, loadShaderSource($"{name}.vs.glsl"));
+			GL.ShaderSource(vertexShader, SourceLoader.AsString($"shaders.{name}.vs.glsl"));
 			GL.CompileShader(vertexShader);
 			checkCompileStatus($"Vertex Shader: {name}", vertexShader);
 
-			GL.ShaderSource(fragmentShader, loadShaderSource($"{name}.fs.glsl"));
+			GL.ShaderSource(fragmentShader, SourceLoader.AsString($"shaders.{name}.fs.glsl"));
 			GL.CompileShader(fragmentShader);
 			checkCompileStatus($"Fragment Shader: {name}", fragmentShader);
 			
@@ -35,15 +33,6 @@ namespace ColladaParser.Shaders
 		protected virtual void SetUniforms() 
 		{
 
-		}
-
-		private static string loadShaderSource(string name) 
-		{
-			var assembly = Assembly.GetEntryAssembly();
-
-			using (var stream = assembly.GetManifestResourceStream($"collada-parser.shaders.{name}"))
-				using (var reader = new StreamReader(stream))
-					return reader.ReadToEnd();
 		}
 
 		private void checkCompileStatus(string shaderName, int shader)
