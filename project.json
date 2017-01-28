@@ -2,11 +2,13 @@
   "version": "1.0.0-*",
   "buildOptions": {
     "debugType": "portable",
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "allowUnsafe": true
   },
   "resource": [
     "shaders/*.glsl",
-    "models/*.dae"
+    "models/*.dae",
+    "models/textures/*.bmp"
   ],
   "dependencies": {},
   "frameworks": {

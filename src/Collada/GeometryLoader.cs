@@ -10,10 +10,11 @@ namespace ColladaParser.Collada
 	{
 		private static XNamespace ns = "{http://www.collada.org/2005/11/COLLADASchema}";
 
-		public List<Vertex> Vertices { get; set; }
-		public List<Vector3> Normals { get; set; }
-		public List<Vector2> Textures { get; set; }
-		public List<int> PolyList { get; set; }
+		private List<Vertex> Vertices;
+		private List<Vector3> Normals;
+		private List<Vector2> Textures;		
+		private List<Vector3> Colors;	
+		private List<int> PolyList;
 
 		private XElement mesh;
 
@@ -21,8 +22,6 @@ namespace ColladaParser.Collada
 		public GeometryLoader(XElement mesh)
 		{
 			Vertices = new List<Vertex>();
-			Normals = new List<Vector3>();
-			Textures = new List<Vector2>();
 			PolyList = new List<int>();
 
 			this.mesh = mesh;
@@ -30,13 +29,15 @@ namespace ColladaParser.Collada
 
 		public Geometry Load()
 		{
+			// Vertices
 			var positionId = mesh
 				.Element($"{ns}vertices")
 				.Element($"{ns}input")
 				.Attribute("source").Value.TrimStart(new[]{ '#' });
 
-			// Vertices
-			Vertices = readVertices(mesh, positionId).ToList();
+			var polylist = readVecArray<Vector3>(mesh, positionId);
+			foreach(var poly in polylist)
+				Vertices.Add(new Vertex(Vertices.Count, poly));
 
 			// Normals
 			var normals = mesh
@@ -44,7 +45,9 @@ namespace ColladaParser.Collada
 				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "NORMAL");
 			if (normals != null) {
 				var normalId = normals.Attribute("source").Value.TrimStart(new[]{ '#' });
-				Normals = readNormals(mesh, normalId).ToList();
+
+				Normals = new List<Vector3>();
+				Normals = readVecArray<Vector3>(mesh, normalId);
 			}
 
 			// Textures
@@ -53,7 +56,20 @@ namespace ColladaParser.Collada
 				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "TEXCOORD");
 			if (texCoords != null) {
 				var texCoordId = texCoords.Attribute("source").Value.TrimStart(new[]{ '#' });
-				Textures = readTextures(mesh, texCoordId).ToList();
+
+				Textures = new List<Vector2>();
+				Textures = readVecArray<Vector2>(mesh, texCoordId);
+			}
+
+			// Colors
+			var colors = mesh
+				.Element($"{ns}polylist")
+				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "COLOR");
+			if (colors != null) {
+				var colorId = colors.Attribute("source").Value.TrimStart(new[]{ '#' });
+
+				Colors = new List<Vector3>();
+				Colors = readVecArray<Vector3>(mesh, colorId);
 			}
 
 			assembleVertices(mesh);
@@ -61,9 +77,8 @@ namespace ColladaParser.Collada
 
 			return convertDataToArrays();
 		}
-		
 
-		private IEnumerable<Vertex> readVertices(XElement mesh, string id)
+		private List<T> readVecArray<T>(XElement mesh, string id)
 		{
 			var data = mesh
 				.Elements($"{ns}source").FirstOrDefault(x => x.Attribute("id").Value == id)
@@ -71,105 +86,94 @@ namespace ColladaParser.Collada
 
 			var count = int.Parse(data.Attribute("count").Value);
 			var array = parseFloats(data.Value);
+			var result = new List<T>();
 
-			for (int i = 0; i < count / 3; i++)
-				yield return new Vertex(Vertices.Count, new Vector3(
-					array[i * 3], 
-					array[i * 3 + 2], 
-					array[i * 3 + 1]));
-		}
-
-		private IEnumerable<Vector3> readNormals(XElement mesh, string id)
-		{
-			var data = mesh
-				.Elements($"{ns}source").FirstOrDefault(x => x.Attribute("id").Value == id)
-				.Element($"{ns}float_array");
-
-			var count = int.Parse(data.Attribute("count").Value);
-			var array = parseFloats(data.Value);
-
-			for (int i = 0; i < count / 3; i++) 
-				yield return new Vector3(
-					array[i * 3],
-					array[i * 3 + 2],
-					array[i * 3 + 1]
-				);
-		}
-
-		private IEnumerable<Vector2> readTextures(XElement mesh, string id)
-		{
-			var data = mesh
-				.Elements($"{ns}source").FirstOrDefault(x => x.Attribute("id").Value == id)
-				.Element($"{ns}float_array");
-
-			var count = int.Parse(data.Attribute("count").Value);
-			var array = parseFloats(data.Value);
-
-			for (int i = 0; i < count / 2; i++)
-				yield return new Vector2(
-					array[i * 2],
-					array[i * 2 + 1]
-				);
+			if(typeof(T) == typeof(Vector3))
+				for (var i = 0; i < count / 3; i++) 
+					result.Add((T)(object)new Vector3(
+						array[i * 3],
+						array[i * 3 + 2],
+						array[i * 3 + 1]
+					));
+			else if(typeof(T) == typeof(Vector2))
+				for (var i = 0; i < count / 2; i++) 
+					result.Add((T)(object)new Vector2(
+						array[i * 2],
+						array[i * 2 + 1]
+					));
+			
+			return result;
 		}
 		
 		private void assembleVertices(XElement mesh) 
 		{
 			var poly = mesh.Element($"{ns}polylist");
 			var typeCount = poly.Elements($"{ns}input").Count();
-			var indexData = parseInts(poly.Element($"{ns}p").Value);
+			var id = parseInts(poly.Element($"{ns}p").Value);
 
-			for(int i = 0; i < indexData.Count / typeCount; i++) {
-				processVertex(indexData[i * typeCount], 
-					indexData[i * typeCount + 1], 
-					indexData[i * typeCount + 2]);
+			for(int i = 0; i < id.Count / typeCount; i++) {
+				var textureIndex = -1;
+				var colorIndex = -1;
+				var index = 0;
+
+				var posIndex = id[i * typeCount + index]; index++;
+				var normalIndex = id[i * typeCount + index]; index++;
+
+				if(Textures != null) {
+					textureIndex = id[i * typeCount + index]; index++;
+				}
+
+				if(Colors != null) {
+					colorIndex = id[i * typeCount + index]; index++;
+				}
+
+				processVertex(posIndex, normalIndex, textureIndex, colorIndex);
 			}
 		}
 
-		private Vertex processVertex(int posIndex, int normIndex, int texIndex) {
+		private void processVertex(int posIndex, int normalIndex, int textureIndex, int colorIndex) {
 			var currentVertex = Vertices[posIndex];
 			
 			if (!currentVertex.IsSet) {
-				currentVertex.TextureIndex = texIndex;
-				currentVertex.NormalIndex = normIndex;
+				currentVertex.NormalIndex = normalIndex;
+				currentVertex.TextureIndex = textureIndex;
+				currentVertex.ColorIndex = colorIndex;
 				PolyList.Add(posIndex);
-				return currentVertex;
 			} else {
-				return dealWithAlreadyProcessedVertex(currentVertex, texIndex, normIndex);
+				handleAlreadyProcessedVertex(currentVertex, normalIndex, textureIndex, colorIndex);
 			}
 		}
 
-		private Vertex dealWithAlreadyProcessedVertex(Vertex previousVertex, int newTextureIndex, int newNormalIndex) 
+		private void handleAlreadyProcessedVertex(Vertex previousVertex, int newNormalIndex, int newTextureIndex, int newColorIndex) 
 		{
-			if (previousVertex.hasSameTextureAndNormal(newTextureIndex, newNormalIndex)) {
+			if (previousVertex.HasSameInformation(newNormalIndex, newTextureIndex, newColorIndex)) {
 				PolyList.Add(previousVertex.Index);
-				return previousVertex;
+				return;
 			} 
-			else {
-				if (previousVertex.DuplicateVertex != null) {
-					return dealWithAlreadyProcessedVertex(previousVertex.DuplicateVertex, newTextureIndex, newNormalIndex);
-				} 
-				else {
-					var duplicateVertex = new Vertex(Vertices.Count, previousVertex.Position);
 
-					duplicateVertex.TextureIndex = newTextureIndex;
-					duplicateVertex.NormalIndex = newNormalIndex;
-					previousVertex.DuplicateVertex = duplicateVertex;
+			if (previousVertex.DuplicateVertex != null) {
+				handleAlreadyProcessedVertex(previousVertex.DuplicateVertex, newNormalIndex, newTextureIndex, newColorIndex);
+				return;
+			} 
 
-					Vertices.Add(duplicateVertex);
-					PolyList.Add(duplicateVertex.Index);
+			var duplicateVertex = new Vertex(Vertices.Count, previousVertex.Position);
 
-					return duplicateVertex;
-				}
-			}
+			duplicateVertex.NormalIndex = newNormalIndex;
+			duplicateVertex.TextureIndex = newTextureIndex;
+			duplicateVertex.ColorIndex = newColorIndex;
+			previousVertex.DuplicateVertex = duplicateVertex;
+
+			Vertices.Add(duplicateVertex);
+			PolyList.Add(duplicateVertex.Index);
 		}
 
 		private void removeUnusedVertices() 
 		{
 			foreach (var vertex in Vertices) {
-				
 				if (!vertex.IsSet) {
-					vertex.TextureIndex = 0;
 					vertex.NormalIndex = 0;
+					vertex.TextureIndex = 0;
+					vertex.ColorIndex = 0;
 				}
 			}
 		}
@@ -177,23 +181,28 @@ namespace ColladaParser.Collada
 		private Geometry convertDataToArrays() 
 		{
 			var verticesArray = new Vector3[Vertices.Count];
-			var texturesArray = new Vector2[Vertices.Count];
 			var normalsArray = new Vector3[Vertices.Count];
+
+			Vector2[] texturesArray = null;
+			Vector3[] colorsArray = null;
+
+			if(Textures != null)
+				texturesArray = new Vector2[Vertices.Count];
+
+			if(Colors != null)
+				colorsArray = new Vector3[Vertices.Count];
 
 			for (int i = 0; i < Vertices.Count; i++) {
 				Vertex currentVertex = Vertices[i];
 				
-				var position = currentVertex.Position;
-				var textureCoord = Textures[currentVertex.TextureIndex];
-				var normalVector = Normals[currentVertex.NormalIndex];
+				verticesArray[i] = currentVertex.Position;
+				normalsArray[i] = Normals[currentVertex.NormalIndex];
 
-				verticesArray[i] = position;
-				texturesArray[i] = textureCoord;
-				normalsArray[i] = normalVector;
-
+				if(texturesArray != null) texturesArray[i] = Textures[currentVertex.TextureIndex];
+				if(colorsArray != null) colorsArray[i] = Colors[currentVertex.ColorIndex];
 			}
 
-			return new Geometry(verticesArray, normalsArray, texturesArray, PolyList.ToArray());
+			return new Geometry(verticesArray, normalsArray, texturesArray, colorsArray, PolyList.ToArray());
 		}
 
 		private static List<float> parseFloats(string input) 

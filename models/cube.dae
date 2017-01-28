@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-10-24, commit time:12:20, hash:e8299c8</authoring_tool>
     </contributor>
-    <created>2017-01-27T21:31:08</created>
-    <modified>2017-01-27T21:31:08</modified>
+    <created>2017-01-28T08:43:20</created>
+    <modified>2017-01-28T08:43:20</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -158,12 +158,13 @@
             </accessor>
           </technique_common>
         </source>
-        <source id="Cube-mesh-map-0">
-          <float_array id="Cube-mesh-map-0-array" count="72">0.3331336 0.666467 1.9976e-4 0.3335332 1.99825e-4 0.666467 1.9982e-4 1.9976e-4 0.3331336 0.3331336 1.9976e-4 0.3331336 0.6668666 1.998e-4 0.9998003 0.3331336 0.6668666 0.3331336 0.3335332 1.998e-4 0.666467 0.3331336 0.3335331 0.3331336 0.3331336 0.6668666 1.9976e-4 0.9998003 0.3331336 0.9998003 0.666467 0.666467 0.3335332 0.3335332 0.3335331 0.6664671 0.3331336 0.666467 0.3331336 0.3335332 1.9976e-4 0.3335332 1.9982e-4 1.9976e-4 0.3331336 1.998e-4 0.3331336 0.3331336 0.6668666 1.998e-4 0.9998003 1.9976e-4 0.9998003 0.3331336 0.3335332 1.998e-4 0.666467 1.9976e-4 0.666467 0.3331336 0.3331336 0.6668666 1.9976e-4 0.6668666 1.9976e-4 0.9998003 0.666467 0.666467 0.666467 0.3335332 0.3335332 0.3335332</float_array>
+        <source id="Cube-mesh-colors-Col" name="Col">
+          <float_array id="Cube-mesh-colors-Col-array" count="108">0.2352941 0.04313725 1 0.3294118 0.1607843 1 0.2470588 0.05098038 1 1 0.1803922 0 1 0.2352941 0.06666666 1 0.2313725 0.05882352 1 0.2313725 0.05882352 0.7529412 0.6901961 1 1 0.1803922 0 1 0.2352941 0.06666666 1 0.1803922 0 0.7529412 0.6901961 1 0.2078431 0.003921568 1 0.4705882 0.3372549 1 0.254902 0.06274509 1 0.2078431 0.003921568 1 0.4705882 0.3372549 1 0.9529412 0.9372549 1 0.2352941 0.04313725 1 0.227451 0.02745097 1 0.3294118 0.1607843 1 1 0.1803922 0 0.2235294 0.02352941 1 1 0.2352941 0.06666666 1 0.2313725 0.05882352 1 0.2352941 0.06666666 0.7529412 0.6901961 1 1 0.2352941 0.06666666 0.2235294 0.02352941 1 1 0.1803922 0 0.2078431 0.003921568 1 0.2588235 0.07058823 1 0.4705882 0.3372549 1 0.2078431 0.003921568 1 0.254902 0.06274509 1 0.4705882 0.3372549 1</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-map-0-array" count="36" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
+            <accessor source="#Cube-mesh-colors-Col-array" count="36" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
             </accessor>
           </technique_common>
         </source>
@@ -173,7 +174,7 @@
         <polylist material="Material-material" count="12">
           <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Cube-mesh-map-0" offset="2" set="0"/>
+          <input semantic="COLOR" source="#Cube-mesh-colors-Col" offset="2" set="0"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
           <p>1 0 0 3 0 1 0 0 2 7 1 3 5 1 4 4 1 5 4 2 6 1 2 7 0 2 8 5 3 9 2 3 10 1 3 11 2 4 12 7 4 13 3 4 14 0 5 15 7 5 16 4 5 17 1 6 18 2 6 19 3 6 20 7 7 21 6 7 22 5 7 23 4 8 24 5 8 25 1 8 26 5 9 27 6 9 28 2 9 29 2 10 30 6 10 31 7 10 32 0 11 33 3 11 34 7 11 35</p>
         </polylist>
@@ -196,9 +197,7 @@
         <instance_geometry url="#Cube-mesh" name="Cube">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material">
-                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
+              <instance_material symbol="Material-material" target="#Material-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>

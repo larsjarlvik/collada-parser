@@ -11,8 +11,6 @@ namespace ColladaParser
 	public class Program : GameWindow
 	{
 		private DefaultShader defaultShader;
-		private Model cube;
-
 		private ColladaModel model;
 
 		private Matrix4 projectionMatrix;
@@ -22,7 +20,7 @@ namespace ColladaParser
 
 		public Program()
 			: base(1280, 720,
-			new GraphicsMode(), "ColladaParser", 0,
+			new GraphicsMode(32, 24, 0, 4), "ColladaParser", 0,
 			DisplayDevice.Default, 3, 3,
 			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) { }
 
@@ -30,25 +28,22 @@ namespace ColladaParser
 		{
 			VSync = VSyncMode.On;
 
+			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1.0f);
+			GL.Enable(EnableCap.Texture2D);
+			GL.Enable(EnableCap.DepthTest);
+			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
+
 			defaultShader = new DefaultShader();
 
-			model = ColladaLoader.Load("model");
+			model = ColladaLoader.Load("cowboy");
 			model.CreateVBOs();
-			model.Bind(defaultShader.ShaderProgram);
-
-			cube = new Model();
-			cube.Bind(defaultShader.ShaderProgram);
-
-			GL.Enable(EnableCap.DepthTest);
-			GL.ClearColor(Color.Gray);
+			model.LoadTextures();
+			model.Bind(defaultShader.ShaderProgram, defaultShader.Texture, defaultShader.HaveTexture);
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{
-			var rotation = Matrix4.CreateRotationY((float)e.Time);
-
-			Matrix4.Mult(ref rotation, ref modelViewMatrix, out modelViewMatrix);
-			GL.UniformMatrix4(defaultShader.ModelViewMatrix, false, ref modelViewMatrix);
 
 			if (Keyboard[OpenTK.Input.Key.Escape])
 				Exit();
@@ -61,6 +56,11 @@ namespace ColladaParser
 				cameraDistance += 0.5f;
 				OnResize(null);
 			}
+
+
+			var rotation = Matrix4.CreateRotationY((float)e.Time);
+			Matrix4.Mult(ref rotation, ref modelViewMatrix, out modelViewMatrix);
+			GL.UniformMatrix4(defaultShader.ModelViewMatrix, false, ref modelViewMatrix);
 		}
 
 		protected override void OnResize(EventArgs e)

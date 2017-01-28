@@ -27,6 +27,9 @@ namespace ColladaParser.Shaders
 			GL.LinkProgram(ShaderProgram);
 			GL.UseProgram(ShaderProgram);
 
+			GL.ValidateProgram(ShaderProgram);
+			Console.WriteLine(GL.GetProgramInfoLog(ShaderProgram));
+
 			SetUniforms();
 		}
 
