@@ -3,13 +3,13 @@
   "buildOptions": {
     "debugType": "portable",
     "emitEntryPoint": true,
-    "allowUnsafe": true
+    "allowUnsafe": true,
+    "embed": [
+      "shaders/*.glsl",
+      "models/*.dae",
+      "models/textures/*.bmp"
+    ]
   },
-  "resource": [
-    "shaders/*.glsl",
-    "models/*.dae",
-    "models/textures/*.bmp"
-  ],
   "dependencies": {},
   "frameworks": {
     "netcoreapp1.1": {
