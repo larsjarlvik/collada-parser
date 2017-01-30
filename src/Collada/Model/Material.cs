@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ColladaParser.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace ColladaParser.Collada.Model
@@ -15,19 +16,26 @@ namespace ColladaParser.Collada.Model
 		private const int GL_LINEAR_MIPMAP_LINEAR = 0x2703;
 		private const float GL_CLAMP_TO_EDGE = 0x812F;
 
-		private bool haveTexture = false;
-
 		private int textureWidth;
 		private int textureHeight;
-
-
-		private string fileName;
 		private int textureId;
 
-		public Material(string fileName)
-		{
-			this.fileName = fileName;
+		private string textureName;
+
+		// Material properties
+		public string TextureName { 
+			get { return textureName; }
+			set {
+				haveTexture = value != null;
+				textureName = value;
+			}
 		}
+
+		public bool haveTexture { get; private set; }
+		public Vector4 Diffuse { get; set; }
+		public Vector4 Specular { get; set; }
+		public float Shininess { get; set; }
+
 
 		private int parseHeader(byte[] header) 
 		{
@@ -47,12 +55,12 @@ namespace ColladaParser.Collada.Model
 			
 		public unsafe void LoadTexture(string texturePath)
 		{
-			if (fileName == null)
+			if (TextureName == null)
 				return;
 
-			var imageStream = SourceLoader.AsStream($"{texturePath}.{fileName}");
+			var imageStream = SourceLoader.AsStream($"{texturePath}.{TextureName}");
 			if (imageStream == null)
-				throw new ApplicationException($"Texture resource '{texturePath}.{fileName}' not found!");
+				throw new ApplicationException($"Texture resource '{texturePath}.{TextureName}' not found!");
 			
 			// Read bitmap header
 			var header = new byte[BITMAP_HEADER_LENGTH];

@@ -14,30 +14,29 @@ namespace ColladaParser.Collada
 		{
 			using(var xml = SourceLoader.AsStream($"models.{name}.dae"))
 			{
-				var root = XDocument.Load(xml);
+				var xRoot = XDocument.Load(xml);
 				var model = new ColladaModel();
 
 				// Parse Geometries
-				var geoPaths = root.Descendants($"{ns}mesh");
-				if (!geoPaths.Any())
+				var xMeshes = xRoot.Descendants($"{ns}mesh");
+				if (!xMeshes.Any())
 					throw new ApplicationException("Failed to find geometries!");
 
-				foreach(var geoPath in geoPaths) {
-					var geoLoader = new GeometryLoader(geoPath);
+				foreach(var xMesh in xMeshes) {
+					var geoLoader = new GeometryLoader(xMesh);
 					var geometry = geoLoader.Load();
 					
 					model.Geometries.Add(geometry);
 				}
 
 				// Parse Materials
-				var matPaths = root.Descendants($"{ns}material");
-				foreach(var matPath in matPaths) {
-					var materialLoader = new MaterialLoader(root, matPath);
+				var xMaterials = xRoot.Descendants($"{ns}material");
+				foreach(var xMaterial in xMaterials) {
+					var materialLoader = new MaterialLoader(xRoot, xMaterial);
 					var material = materialLoader.Load();
 
 					model.Materials.Add(material);
 				}
-
 
 				return model;
 			}

@@ -16,7 +16,10 @@ namespace ColladaParser
 		private Matrix4 projectionMatrix;
 		private Matrix4 modelViewMatrix;
 
-		private float cameraDistance = 10.0f;
+		private float cameraDistance = 20.0f;
+		private float cameraRotation = 0.0f;
+
+		private int FPS;
 
 		public Program()
 			: base(1280, 720,
@@ -26,7 +29,7 @@ namespace ColladaParser
 
 		protected override void OnLoad (System.EventArgs e)
 		{
-			VSync = VSyncMode.On;
+			VSync = VSyncMode.Off;
 
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1.0f);
 			GL.Enable(EnableCap.Texture2D);
@@ -44,7 +47,6 @@ namespace ColladaParser
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{
-
 			if (Keyboard[OpenTK.Input.Key.Escape])
 				Exit();
 
@@ -56,11 +58,18 @@ namespace ColladaParser
 				cameraDistance += 0.5f;
 				OnResize(null);
 			}
+			if (Keyboard[OpenTK.Input.Key.F]) {
+				WindowState = WindowState == WindowState.Fullscreen ? WindowState.Normal : WindowState.Fullscreen;
+			}
+			
+			cameraRotation += (float)e.Time;
+			var camX = (float)Math.Sin(cameraRotation) * cameraDistance;
+ 			var camZ = (float)Math.Cos(cameraRotation) * cameraDistance;
 
-
-			var rotation = Matrix4.CreateRotationY((float)e.Time);
-			Matrix4.Mult(ref rotation, ref modelViewMatrix, out modelViewMatrix);
+			modelViewMatrix = Matrix4.LookAt(new Vector3(camX, cameraDistance * 0.5f, camZ), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 			GL.UniformMatrix4(defaultShader.ModelViewMatrix, false, ref modelViewMatrix);
+
+			Title = $"Collada Parser (Vsync: {VSync}) FPS: {FPS}";
 		}
 
 		protected override void OnResize(EventArgs e)
@@ -68,16 +77,14 @@ namespace ColladaParser
 			var aspectRatio = (float)Width / (float)Height;
 
 			Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, aspectRatio, 1, 100, out projectionMatrix);
-			modelViewMatrix = Matrix4.LookAt(new Vector3(0, cameraDistance * 1.5f, -cameraDistance * 2.0f), new Vector3(0, 2, 0), new Vector3(0, 1, 0));
-
 			GL.UniformMatrix4(defaultShader.ProjectionMatrix, false, ref projectionMatrix);
-			GL.UniformMatrix4(defaultShader.ModelViewMatrix, false, ref modelViewMatrix);
 
 			GL.Viewport(0, 0, Width, Height);
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
+			FPS = (int)(1f / e.Time);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			model.Render();
@@ -87,9 +94,9 @@ namespace ColladaParser
 
 		public static void Main()
 		{
-			using (Program example = new Program())
+			using (var program = new Program())
 			{
-				example.Run(30);
+				program.Run(30);
 			}
 		}
 	}
