@@ -24,4 +24,4 @@ To publish a self contained version of collada-parser
 dotnet restore
 dotnet publish -c release
 ```
-Published files will be found under /bin/release/netcoreapp1.1/<platform/publish
+Published files will be found under /bin/release/netcoreapp1.1/`<platform>`/publish
