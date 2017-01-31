@@ -5,6 +5,7 @@ using ColladaParser.Shaders;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace ColladaParser
 {
@@ -21,11 +22,14 @@ namespace ColladaParser
 
 		private int FPS;
 
-		public Program()
-			: base(1280, 720,
+		public Program() : base(
+			1280, 720,
 			new GraphicsMode(32, 24, 0, 4), "ColladaParser", 0,
 			DisplayDevice.Default, 3, 3,
-			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) { }
+			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) 
+		{
+			Keyboard.KeyRepeat = false;
+		}
 
 		protected override void OnLoad (System.EventArgs e)
 		{
@@ -45,11 +49,20 @@ namespace ColladaParser
 			model.Bind(defaultShader.ShaderProgram, defaultShader.Texture, defaultShader.HaveTexture);
 		}
 
-		protected override void OnUpdateFrame(FrameEventArgs e)
+		protected override void OnKeyDown(KeyboardKeyEventArgs e) 
 		{
+			if(e.IsRepeat)
+				return;
+
 			if (Keyboard[OpenTK.Input.Key.Escape])
 				Exit();
 
+			if(Keyboard[OpenTK.Input.Key.F])
+				WindowState = WindowState == WindowState.Fullscreen ? WindowState.Normal : WindowState.Fullscreen;
+		}
+
+		protected override void OnUpdateFrame(FrameEventArgs e)
+		{
 			if (Keyboard[OpenTK.Input.Key.W]) {
 				cameraDistance -= 0.5f;
 				OnResize(null);
@@ -58,10 +71,7 @@ namespace ColladaParser
 				cameraDistance += 0.5f;
 				OnResize(null);
 			}
-			if (Keyboard[OpenTK.Input.Key.F]) {
-				WindowState = WindowState == WindowState.Fullscreen ? WindowState.Normal : WindowState.Fullscreen;
-			}
-			
+
 			cameraRotation += (float)e.Time;
 			var camX = (float)Math.Sin(cameraRotation) * cameraDistance;
  			var camZ = (float)Math.Cos(cameraRotation) * cameraDistance;
