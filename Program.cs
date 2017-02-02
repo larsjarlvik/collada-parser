@@ -14,26 +14,26 @@ namespace ColladaParser
 		private DefaultShader defaultShader;
 		private ColladaModel model;
 
-		private Matrix4 projectionMatrix;
-		private Matrix4 modelViewMatrix;
-
 		private float cameraDistance = 20.0f;
 		private float cameraRotation = 0.0f;
 
 		private int FPS;
 
-		public Program() : base(
+		private string modelName;
+
+		public Program(string modelName) : base(
 			1280, 720,
 			new GraphicsMode(32, 24, 0, 4), "ColladaParser", 0,
 			DisplayDevice.Default, 3, 3,
 			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) 
 		{
+			this.modelName = modelName;
 			Keyboard.KeyRepeat = false;
 		}
 
 		protected override void OnLoad (System.EventArgs e)
 		{
-			VSync = VSyncMode.Off;
+			VSync = VSyncMode.On;
 
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1.0f);
 			GL.Enable(EnableCap.Texture2D);
@@ -43,10 +43,16 @@ namespace ColladaParser
 
 			defaultShader = new DefaultShader();
 
-			model = ColladaLoader.Load("cowboy");
+			model = ColladaLoader.Load(modelName);
 			model.CreateVBOs();
 			model.LoadTextures();
-			model.Bind(defaultShader.ShaderProgram, defaultShader.Texture, defaultShader.HaveTexture);
+			model.Bind(defaultShader.ShaderProgram, 
+				defaultShader.Texture, 
+				defaultShader.HaveTexture,
+				defaultShader.Ambient,
+				defaultShader.Diffuse,
+				defaultShader.Specular,
+				defaultShader.Shininess);
 		}
 
 		protected override void OnKeyDown(KeyboardKeyEventArgs e) 
@@ -76,19 +82,14 @@ namespace ColladaParser
 			var camX = (float)Math.Sin(cameraRotation) * cameraDistance;
  			var camZ = (float)Math.Cos(cameraRotation) * cameraDistance;
 
-			modelViewMatrix = Matrix4.LookAt(new Vector3(camX, cameraDistance * 0.5f, camZ), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
-			GL.UniformMatrix4(defaultShader.ModelViewMatrix, false, ref modelViewMatrix);
-
+			Matrix.SetViewMatrix(defaultShader.ViewMatrix, new Vector3(camX, cameraDistance * 0.5f, camZ), new Vector3(0, 0, 0));
 			Title = $"Collada Parser (Vsync: {VSync}) FPS: {FPS}";
 		}
 
 		protected override void OnResize(EventArgs e)
 		{
 			var aspectRatio = (float)Width / (float)Height;
-
-			Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, aspectRatio, 1, 100, out projectionMatrix);
-			GL.UniformMatrix4(defaultShader.ProjectionMatrix, false, ref projectionMatrix);
-
+			Matrix.SetProjectionMatrix(defaultShader.ProjectionMatrix, (float)Math.PI / 4, aspectRatio);
 			GL.Viewport(0, 0, Width, Height);
 		}
 
@@ -102,9 +103,14 @@ namespace ColladaParser
 			SwapBuffers();
 		}
 
-		public static void Main()
+		public static void Main(string[] args)
 		{
-			using (var program = new Program())
+			if(args.Length < 1) {
+				Console.WriteLine("Model not specified!");
+				Environment.Exit(-1);
+			}
+
+			using (var program = new Program(args[0]))
 			{
 				program.Run(30);
 			}

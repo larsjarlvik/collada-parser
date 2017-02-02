@@ -33,10 +33,7 @@ namespace ColladaParser.Shaders
 			SetUniforms();
 		}
 
-		protected virtual void SetUniforms() 
-		{
-
-		}
+		protected virtual void SetUniforms() {}
 
 		private void checkCompileStatus(string shaderName, int shader)
 		{

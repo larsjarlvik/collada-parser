@@ -23,10 +23,10 @@ namespace ColladaParser.Collada.Model
 			Materials.ForEach(m => m.LoadTexture("models.textures"));
 		}
 
-		public void Bind(int shaderProgram, int textureLocation, int haveTextureLocation)
+		public void Bind(int shaderProgram, int textureLoc, int haveTextureLoc, int ambientLoc, int diffuseLoc, int specularLoc, int shininessLoc)
 		{
 			Geometries.ForEach(g => g.Bind(shaderProgram));
-			Materials.ForEach(m => m.Bind(textureLocation, haveTextureLocation));
+			Materials.ForEach(m => m.Bind(textureLoc, haveTextureLoc, ambientLoc, diffuseLoc, specularLoc, shininessLoc));
 		}
 
 		public void Render() 

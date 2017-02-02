@@ -7,7 +7,7 @@
 			"request": "launch",
 			"preLaunchTask": "build",
 			"program": "${workspaceRoot}\\bin\\Debug\\netcoreapp1.1\\collada-parser.dll",
-			"args": [],
+			"args": ["cowboy"],
 			"cwd": "${workspaceRoot}",
 			"stopAtEntry": false,
 			"externalConsole": false,

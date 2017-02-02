@@ -57,6 +57,9 @@
             <ambient>
               <color sid="ambient">0 0 0 1</color>
             </ambient>
+            <ambient>
+              <color sid="diffuse">0.64 0.64 0.64 1</color>
+            </ambient>
             <diffuse>
               <texture texture="character_Texture_png-sampler" texcoord="UVMap"/>
             </diffuse>
@@ -64,7 +67,7 @@
               <color sid="specular">0.5 0.5 0.5 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">50</float>
+              <float sid="shininess">20</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>

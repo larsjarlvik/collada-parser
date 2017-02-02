@@ -32,6 +32,7 @@ namespace ColladaParser.Collada.Model
 		}
 
 		public bool haveTexture { get; private set; }
+		public Vector4 Ambient { get; set; }
 		public Vector4 Diffuse { get; set; }
 		public Vector4 Specular { get; set; }
 		public float Shininess { get; set; }
@@ -95,15 +96,20 @@ namespace ColladaParser.Collada.Model
 			haveTexture = true;
 		}
 
-		public void Bind(int textureLocation, int haveTextureLocation)
+		public void Bind(int textureLoc, int haveTextureLoc, int ambientLoc, int diffuseLoc, int specularLoc, int shininessLoc)
 		{
 			if (haveTexture) {
 				GL.BindTexture(TextureTarget.Texture2D, textureId);
-				GL.Uniform1(textureLocation, 0);
-				GL.Uniform1(haveTextureLocation, 1);
+				GL.Uniform1(textureLoc, 0);
+				GL.Uniform1(haveTextureLoc, 1);
 			} else {
-				GL.Uniform1(haveTextureLocation, 0);
+				GL.Uniform1(haveTextureLoc, 0);
 			}
+
+			GL.Uniform3(ambientLoc, Ambient.X, Ambient.Y, Ambient.Z);
+			GL.Uniform3(diffuseLoc, Diffuse.X, Diffuse.Y, Diffuse.Z);
+			GL.Uniform3(specularLoc, Specular.X, Specular.Y, Specular.Z);
+			GL.Uniform1(shininessLoc, Shininess);
 		}
 	}
 }
