@@ -37,6 +37,7 @@ namespace ColladaParser.Collada.Model
 		public Vector4 Specular { get; set; }
 		public float Shininess { get; set; }
 
+		private PixelFormat pixelFormat;
 
 		private int parseHeader(byte[] header) 
 		{
@@ -44,9 +45,11 @@ namespace ColladaParser.Collada.Model
 			if (fileType != "BM")
 				throw new ApplicationException($"Texture has invalid file type, expected BM got {fileType}!");
 
-			var compression = BitConverter.ToInt32(header, 30);
-			if (compression != 0)
-				throw new ApplicationException("Compressed bitmaps are not supported!");
+			var format = BitConverter.ToInt32(header, 30);
+			if (format != 0 && format != 3)
+				throw new ApplicationException("Unsupported bitmap format!");
+
+			pixelFormat = format == 0 ? PixelFormat.Bgr : PixelFormat.Bgra;
 
 			textureWidth = BitConverter.ToInt32(header, 18);
 			textureHeight = BitConverter.ToInt32(header, 22);
@@ -69,9 +72,13 @@ namespace ColladaParser.Collada.Model
 			var start = parseHeader(header);
 
 			// Read bitmap data
-			var buffer = new byte[textureWidth * textureHeight * 3];
+			var pixelSize = pixelFormat == PixelFormat.Bgr ? 3 : 4;
+			var buffer = new byte[textureWidth * textureHeight * pixelSize];
 			imageStream.Seek(start, SeekOrigin.Begin);
-			imageStream.Read(buffer, 0, textureWidth * textureHeight * 3);
+			imageStream.Read(buffer, 0, textureWidth * textureHeight * pixelSize);
+
+			if (pixelFormat == PixelFormat.Bgra)
+				reorganizeBuffer(buffer);
 
 			fixed (byte* p = buffer)
 			{
@@ -81,7 +88,7 @@ namespace ColladaParser.Collada.Model
 				GL.BindTexture(TextureTarget.Texture2D, textureId);
 				GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 				
-				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, textureWidth, textureHeight, 0, PixelFormat.Bgr, PixelType.UnsignedByte, ptr);
+				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, textureWidth, textureHeight, 0, pixelFormat, PixelType.UnsignedByte, ptr);
 
 				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, new [] { GL_LINEAR });
@@ -110,6 +117,17 @@ namespace ColladaParser.Collada.Model
 			GL.Uniform3(diffuseLoc, Diffuse.X, Diffuse.Y, Diffuse.Z);
 			GL.Uniform3(specularLoc, Specular.X, Specular.Y, Specular.Z);
 			GL.Uniform1(shininessLoc, Shininess);
+		}
+
+		private void reorganizeBuffer(byte[] buffer)
+		{
+			for(var i = 0; i < buffer.Count() - 4; i += 4) {
+				var src = buffer.Skip(i).Take(4).ToArray();
+				buffer[i]     = src[1];
+				buffer[i + 1] = src[2];
+				buffer[i + 2] = src[3];
+				buffer[i + 3] = src[0];
+			}
 		}
 	}
 }

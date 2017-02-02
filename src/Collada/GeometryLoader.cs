@@ -89,14 +89,14 @@ namespace ColladaParser.Collada
 			var array = ArrayParsers.ParseFloats(data.Value);
 			var result = new List<T>();
 
-			if(typeof(T) == typeof(Vector3))
+			if (typeof(T) == typeof(Vector3))
 				for (var i = 0; i < count / 3; i++) 
 					result.Add((T)(object)new Vector3(
 						array[i * 3],
 						array[i * 3 + 2],
 						array[i * 3 + 1]
 					));
-			else if(typeof(T) == typeof(Vector2))
+			else if (typeof(T) == typeof(Vector2))
 				for (var i = 0; i < count / 2; i++) 
 					result.Add((T)(object)new Vector2(
 						array[i * 2],
@@ -112,7 +112,7 @@ namespace ColladaParser.Collada
 			var typeCount = poly.Elements($"{ns}input").Count();
 			var id = ArrayParsers.ParseInts(poly.Element($"{ns}p").Value);
 
-			for(int i = 0; i < id.Count / typeCount; i++) {
+			for (int i = 0; i < id.Count / typeCount; i++) {
 				var textureIndex = -1;
 				var colorIndex = -1;
 				var index = 0;
@@ -120,11 +120,11 @@ namespace ColladaParser.Collada
 				var posIndex = id[i * typeCount + index]; index++;
 				var normalIndex = id[i * typeCount + index]; index++;
 
-				if(Textures != null) {
+				if (Textures != null) {
 					textureIndex = id[i * typeCount + index]; index++;
 				}
 
-				if(Colors != null) {
+				if (Colors != null) {
 					colorIndex = id[i * typeCount + index]; index++;
 				}
 
@@ -187,10 +187,10 @@ namespace ColladaParser.Collada
 			Vector2[] texturesArray = null;
 			Vector3[] colorsArray = null;
 
-			if(Textures != null)
+			if (Textures != null)
 				texturesArray = new Vector2[Vertices.Count];
 
-			if(Colors != null)
+			if (Colors != null)
 				colorsArray = new Vector3[Vertices.Count];
 
 			for (int i = 0; i < Vertices.Count; i++) {

@@ -18,8 +18,8 @@ namespace ColladaParser
 		private float cameraRotation = 0.0f;
 
 		private int FPS;
-
 		private string modelName;
+		private bool useBlend;
 
 		public Program(string modelName) : base(
 			1280, 720,
@@ -38,6 +38,7 @@ namespace ColladaParser
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1.0f);
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.DepthTest);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
 
@@ -63,8 +64,20 @@ namespace ColladaParser
 			if (Keyboard[OpenTK.Input.Key.Escape])
 				Exit();
 
-			if(Keyboard[OpenTK.Input.Key.F])
+			if (Keyboard[OpenTK.Input.Key.F])
 				WindowState = WindowState == WindowState.Fullscreen ? WindowState.Normal : WindowState.Fullscreen;
+
+			if (Keyboard[OpenTK.Input.Key.B]) {
+				useBlend = !useBlend;
+
+				if(useBlend) {
+					GL.Disable(EnableCap.DepthTest);
+					GL.Enable(EnableCap.Blend);
+				} else {
+					GL.Enable(EnableCap.DepthTest);
+					GL.Disable(EnableCap.Blend);
+				}
+			}
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
