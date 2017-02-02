@@ -7,9 +7,12 @@ Tested with models exported from blender
 - Load model data including normals, texture coordinates and colors
 - Load textures (BMP only)
 - Render textured and/or colored models
+- Materials (shininess, specular etc.)
 
 ### Planned support
-- Materials (shininess, specular etc.)
+- Multiple meshes
+- Change material settings
+- Transparent textures
 - Animations
 
 ## Setup
