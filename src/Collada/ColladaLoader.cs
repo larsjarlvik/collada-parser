@@ -22,7 +22,7 @@ namespace ColladaParser.Collada
 				if (!xMeshes.Any())
 					throw new ApplicationException("Failed to find geometries!");
 
-				foreach(var xMesh in xMeshes) {
+				foreach (var xMesh in xMeshes) {
 					var geoLoader = new GeometryLoader(xMesh);
 					var geometry = geoLoader.Load();
 					
@@ -31,7 +31,7 @@ namespace ColladaParser.Collada
 
 				// Parse Materials
 				var xMaterials = xRoot.Descendants($"{ns}material");
-				foreach(var xMaterial in xMaterials) {
+				foreach (var xMaterial in xMaterials) {
 					var materialLoader = new MaterialLoader(xRoot, xMaterial);
 					var material = materialLoader.Load();
 

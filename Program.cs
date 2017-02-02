@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ColladaParser.Collada;
 using ColladaParser.Collada.Model;
 using ColladaParser.Shaders;
@@ -21,9 +22,11 @@ namespace ColladaParser
 		private string modelName;
 		private bool useBlend;
 
+		private Multisampling multisampling;
+
 		public Program(string modelName) : base(
 			1280, 720,
-			new GraphicsMode(32, 24, 0, 4), "ColladaParser", 0,
+			new GraphicsMode(32, 24, 0, 0), "ColladaParser", 0,
 			DisplayDevice.Default, 3, 3,
 			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) 
 		{
@@ -42,6 +45,7 @@ namespace ColladaParser
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
 
+			multisampling = new Multisampling(Width, Height, 8);
 			defaultShader = new DefaultShader();
 
 			model = ColladaLoader.Load(modelName);
@@ -84,11 +88,9 @@ namespace ColladaParser
 		{
 			if (Keyboard[OpenTK.Input.Key.W]) {
 				cameraDistance -= 0.5f;
-				OnResize(null);
 			}
 			if (Keyboard[OpenTK.Input.Key.S]) {
 				cameraDistance += 0.5f;
-				OnResize(null);
 			}
 
 			cameraRotation += (float)e.Time;
@@ -103,16 +105,20 @@ namespace ColladaParser
 		{
 			var aspectRatio = (float)Width / (float)Height;
 			Matrix.SetProjectionMatrix(defaultShader.ProjectionMatrix, (float)Math.PI / 4, aspectRatio);
+			
 			GL.Viewport(0, 0, Width, Height);
+			multisampling.RefreshBuffers(Width, Height);
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
 			FPS = (int)(1f / e.Time);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			multisampling.Bind();
 
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			model.Render();
 
+			multisampling.Draw();
 			SwapBuffers();
 		}
 
