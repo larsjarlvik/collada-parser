@@ -38,9 +38,11 @@ namespace ColladaParser
 		{
 			VSync = VSyncMode.On;
 
-			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1.0f);
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.DepthTest);
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Back);
+			GL.FrontFace(FrontFaceDirection.Cw);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
@@ -119,6 +121,7 @@ namespace ColladaParser
 			model.Render();
 
 			multisampling.Draw();
+			
 			SwapBuffers();
 		}
 
