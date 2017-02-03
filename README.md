@@ -8,11 +8,11 @@ Tested with models exported from blender
 - Load textures (BMP only)
 - Render textured and/or colored models
 - Materials (shininess, specular etc.)
+- Transparent textures
 
 ### Planned support
 - Multiple meshes
 - Change material settings
-- Transparent textures
 - Animations
 
 ## Setup
