@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Threading;
 using ColladaParser.Collada;
 using ColladaParser.Collada.Model;
 using ColladaParser.Shaders;
@@ -10,7 +10,7 @@ using OpenTK.Input;
 
 namespace ColladaParser
 {
-	public class Program : GameWindow
+    public class Program : GameWindow
 	{
 		private DefaultShader defaultShader;
 		private ColladaModel model;
@@ -19,6 +19,7 @@ namespace ColladaParser
 		private float cameraRotation = 0.0f;
 
 		private int FPS;
+		private double lastFPSUpdate;
 		private string modelName;
 		private bool useBlend;
 
@@ -31,6 +32,8 @@ namespace ColladaParser
 			GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug) 
 		{
 			this.modelName = modelName;
+			this.lastFPSUpdate = 0;
+
 			Keyboard.KeyRepeat = false;
 		}
 
@@ -64,7 +67,7 @@ namespace ColladaParser
 
 		protected override void OnKeyDown(KeyboardKeyEventArgs e) 
 		{
-			if(e.IsRepeat)
+			if (e.IsRepeat)
 				return;
 
 			if (Keyboard[OpenTK.Input.Key.Escape])
@@ -76,7 +79,7 @@ namespace ColladaParser
 			if (Keyboard[OpenTK.Input.Key.B]) {
 				useBlend = !useBlend;
 
-				if(useBlend) {
+				if (useBlend) {
 					GL.Disable(EnableCap.DepthTest);
 					GL.Enable(EnableCap.Blend);
 				} else {
@@ -95,12 +98,18 @@ namespace ColladaParser
 				cameraDistance += 0.5f;
 			}
 
+			lastFPSUpdate += e.Time;
+			if (lastFPSUpdate > 1) {
+				Title = $"Collada Parser (Vsync: {VSync}) - FPS: {FPS}";
+				FPS = 0;
+				lastFPSUpdate %= 1;
+			}
+
 			cameraRotation += (float)e.Time;
 			var camX = (float)Math.Sin(cameraRotation) * cameraDistance;
  			var camZ = (float)Math.Cos(cameraRotation) * cameraDistance;
 
 			Matrix.SetViewMatrix(defaultShader.ViewMatrix, new Vector3(camX, cameraDistance * 0.5f, camZ), new Vector3(0, 0, 0));
-			Title = $"Collada Parser (Vsync: {VSync}) FPS: {FPS}";
 		}
 
 		protected override void OnResize(EventArgs e)
@@ -114,7 +123,7 @@ namespace ColladaParser
 
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
-			FPS = (int)(1f / e.Time);
+			FPS ++;
 			multisampling.Bind();
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -127,7 +136,7 @@ namespace ColladaParser
 
 		public static void Main(string[] args)
 		{
-			if(args.Length < 1) {
+			if (args.Length < 1) {
 				Console.WriteLine("Model not specified!");
 				Environment.Exit(-1);
 			}
