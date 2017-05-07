@@ -1,23 +1,22 @@
 {
-	"version": "0.2.0",
-	"configurations": [
-		{
-			"name": ".NET Core Launch (console)",
-			"type": "coreclr",
-			"request": "launch",
-			"preLaunchTask": "build",
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
 			"program": "${workspaceRoot}\\bin\\Debug\\netcoreapp1.1\\collada-parser.dll",
-			"args": ["crate"],
-			"cwd": "${workspaceRoot}",
-			"stopAtEntry": false,
-			"externalConsole": false,
-			"internalConsoleOptions": "openOnSessionStart"
-		},
-		{
-			"name": ".NET Core Attach",
-			"type": "coreclr",
-			"request": "attach",
-			"processId": "${command.pickProcess}"
-		}
-	]
+            "args": ["crate"],
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
 }
