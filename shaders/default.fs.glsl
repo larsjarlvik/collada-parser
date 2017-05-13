@@ -1,4 +1,4 @@
-#version 330
+#version 400
 precision highp float;
 
 const vec4 lightPosEye = vec4(350, 350, 350, 1);
@@ -35,7 +35,7 @@ void main(void)
 	vec3 specularReflection = max(dot(s, n), 0.0) + specularLight * pow(max(dot(r,v), 0.0), uShininess);
 
 	// Apply texture/color
-	if(uHaveTexture)
+	if (uHaveTexture)
 		out_frag_color = texture(uTexture, TexCoord);
 	else
 		out_frag_color = vec4(Color, 1.0);

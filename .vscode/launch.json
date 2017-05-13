@@ -6,8 +6,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-			"program": "${workspaceRoot}\\bin\\Debug\\netcoreapp1.1\\collada-parser.dll",
-            "args": ["crate"],
+			"program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/collada-parser.dll",
+            "args": ["cowboy"],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
             "console": "internalConsole"

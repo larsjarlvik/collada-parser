@@ -46,8 +46,6 @@ namespace ColladaParser.Collada
 				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "NORMAL");
 			if (normals != null) {
 				var normalId = normals.Attribute("source").Value.TrimStart(new[]{ '#' });
-
-				Normals = new List<Vector3>();
 				Normals = readVecArray<Vector3>(normalId);
 			}
 
@@ -57,8 +55,6 @@ namespace ColladaParser.Collada
 				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "TEXCOORD");
 			if (texCoords != null) {
 				var texCoordId = texCoords.Attribute("source").Value.TrimStart(new[]{ '#' });
-
-				Textures = new List<Vector2>();
 				Textures = readVecArray<Vector2>(texCoordId);
 			}
 
@@ -68,8 +64,6 @@ namespace ColladaParser.Collada
 				.Elements($"{ns}input").FirstOrDefault(x => x.Attribute("semantic").Value == "COLOR");
 			if (colors != null) {
 				var colorId = colors.Attribute("source").Value.TrimStart(new[]{ '#' });
-
-				Colors = new List<Vector3>();
 				Colors = readVecArray<Vector3>(colorId);
 			}
 
@@ -93,8 +87,8 @@ namespace ColladaParser.Collada
 				for (var i = 0; i < count / 3; i++) 
 					result.Add((T)(object)new Vector3(
 						array[i * 3],
-						array[i * 3 + 2],
-						array[i * 3 + 1]
+						array[i * 3 + 1],
+						array[i * 3 + 2]
 					));
 			else if (typeof(T) == typeof(Vector2))
 				for (var i = 0; i < count / 2; i++) 

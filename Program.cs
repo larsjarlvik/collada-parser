@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Threading;
 using ColladaParser.Collada;
+using ColladaParser.Collada.Animation;
 using ColladaParser.Collada.Model;
 using ColladaParser.Shaders;
 using OpenTK;
@@ -14,6 +14,7 @@ namespace ColladaParser
 	{
 		private DefaultShader defaultShader;
 		private ColladaModel model;
+		private ColladaAnimation animation;
 
 		private float cameraDistance = 20.0f;
 		private float cameraRotation = 0.0f;
@@ -22,6 +23,8 @@ namespace ColladaParser
 		private double lastFPSUpdate;
 		private string modelName;
 		private bool useBlend;
+
+		private int keyFrame = 0;
 
 		private Multisampling multisampling;
 
@@ -37,25 +40,26 @@ namespace ColladaParser
 			Keyboard.KeyRepeat = false;
 		}
 
-		protected override void OnLoad (System.EventArgs e)
+		protected override void OnLoad(System.EventArgs e)
 		{
 			VSync = VSyncMode.On;
 
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Back);
+			GL.CullFace(CullFaceMode.Front);
 			GL.FrontFace(FrontFaceDirection.Cw);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
 
 			multisampling = new Multisampling(Width, Height, 8);
+
 			defaultShader = new DefaultShader();
 
-			model = ColladaLoader.Load(modelName);
+			model = ColladaLoader.LoadModel(modelName);
 			model.CreateVBOs();
-			model.LoadTextures();
+			model.LoadTextures();		
 			model.Bind(defaultShader.ShaderProgram, 
 				defaultShader.Texture, 
 				defaultShader.HaveTexture,
@@ -63,8 +67,14 @@ namespace ColladaParser
 				defaultShader.Diffuse,
 				defaultShader.Specular,
 				defaultShader.Shininess);
-		}
 
+			animation = ColladaLoader.LoadAnimation(modelName);	
+			animation.Animate(
+				model,
+				defaultShader.IsAnimated,
+				defaultShader.JointTransforms);	
+		}
+		
 		protected override void OnKeyDown(KeyboardKeyEventArgs e) 
 		{
 			if (e.IsRepeat)
@@ -87,6 +97,11 @@ namespace ColladaParser
 					GL.Disable(EnableCap.Blend);
 				}
 			}
+
+			if (Keyboard[OpenTK.Input.Key.N]) {
+				keyFrame ++;
+				keyFrame = keyFrame % 5;
+			}
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
@@ -100,7 +115,7 @@ namespace ColladaParser
 
 			lastFPSUpdate += e.Time;
 			if (lastFPSUpdate > 1) {
-				Title = $"Collada Parser (Vsync: {VSync}) - FPS: {FPS}";
+				Title = $"Collada Parser (Vsync: {VSync}) - FPS: {FPS} - KeyFrame: {keyFrame}";
 				FPS = 0;
 				lastFPSUpdate %= 1;
 			}
@@ -127,8 +142,8 @@ namespace ColladaParser
 			multisampling.Bind();
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			model.Render();
 
+			model.Render();
 			multisampling.Draw();
 			
 			SwapBuffers();

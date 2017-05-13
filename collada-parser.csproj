@@ -13,7 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="shaders\*.glsl;models\*.dae;models\textures\*.bmp" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource 
+      Include="shaders\*.glsl;models\*.dae;models\textures\*.bmp" 
+      Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
