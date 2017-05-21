@@ -6,19 +6,18 @@ using OpenTK.Graphics.OpenGL;
 
 namespace ColladaParser.Collada.Model
 {
-	[DebuggerDisplay("Name: {Name}")]
+	[DebuggerDisplay("{Name} ({Id})")]
 	public class Joint
 	{
-		private Matrix4 transform;
-
 		public int Id { get; private set; }
 		public string Name { get; private set; }
 		public List<Joint> Children { get; set; }
+		public Matrix4 Transform { get; set; }
 
 		public Joint(int id, string name, Matrix4 transform)
 		{
 			this.Id = id;
-			this.transform = transform;
+			this.Transform = transform;
 
 			this.Name = name;
 			this.Children = new List<Joint>();

@@ -90,7 +90,7 @@ namespace ColladaParser.Collada
 			// library_visual_scenes
 			var joints = LoadJoints();
 			var root = xVisualScene
-				.Elements($"{ns}node").First(x => x.Attribute("id").Value == "Armature");
+				.Descendants($"{ns}node").First(x => x.Attribute("type").Value == "JOINT");
 
 			return BuiltJointHierarchy(root, joints.First().Name, joints);
 		}

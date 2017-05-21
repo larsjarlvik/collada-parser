@@ -1,7 +1,7 @@
 #version 400
 precision highp float;
 
-#define MAX_JOINTS 16
+#define MAX_JOINTS 50
 #define MAX_WEIGHTS 3
 
 uniform mat4 uProjectionMatrix;

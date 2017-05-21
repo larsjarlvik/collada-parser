@@ -47,8 +47,7 @@ namespace ColladaParser
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Front);
-			GL.FrontFace(FrontFaceDirection.Cw);
+			GL.CullFace(CullFaceMode.Back);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ClearColor(Color.FromArgb(255, 24, 24, 24));
@@ -69,10 +68,8 @@ namespace ColladaParser
 				defaultShader.Shininess);
 
 			animation = ColladaLoader.LoadAnimation(modelName);	
-			animation.Animate(
-				model,
-				defaultShader.IsAnimated,
-				defaultShader.JointTransforms);	
+			animation.SetAnimationState(defaultShader.IsAnimated, true);
+			animation.SetKeyFrame(model, keyFrame, defaultShader.JointTransforms);	
 		}
 		
 		protected override void OnKeyDown(KeyboardKeyEventArgs e) 
@@ -101,6 +98,7 @@ namespace ColladaParser
 			if (Keyboard[OpenTK.Input.Key.N]) {
 				keyFrame ++;
 				keyFrame = keyFrame % 5;
+				animation.SetKeyFrame(model, keyFrame, defaultShader.JointTransforms);	
 			}
 		}
 

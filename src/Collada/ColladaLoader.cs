@@ -44,6 +44,7 @@ namespace ColladaParser.Collada
 				var xVisualScene = xRoot.Descendants($"{ns}visual_scene").FirstOrDefault();
 				if (xController != null) {
 					var jointLoader = new JointLoader(xController, xVisualScene);
+					var jointHierarchy = jointLoader.LoadJointHierarchy();
 
 					// TODO: Support multiple geometries for animation
 					model.Geometries.First().AppendJointInformation(
